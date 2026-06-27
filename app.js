@@ -22,7 +22,7 @@
   const LS = {
     ratings: "hm_ratings_v1",
     pantry: "hm_pantry_v1",
-    placements: "hm_placements_v4",
+    placements: "hm_placements_v5",
     got: "hm_got_v1",
     userrecipes: "hm_userrecipes_v1",
     deleted: "hm_deleted_v1",
