@@ -851,8 +851,12 @@
         ${starRow(r.id, "healthy", "Healthy")}
         ${starRow(r.id, "tasty", "Tasty")}
         ${starRow(r.id, "easy", "Easy")}
-        <div class="rc-actions" style="margin-top:8px">${scorePill}${ready}${isExtra ? "" : `<button class="menu-add-btn" data-addmenu="${r.id}">+ Add to menu</button>`}</div>
+        <div class="rc-actions" style="margin-top:8px">${scorePill}${ready}</div>
         <textarea class="rc-notes" data-notes="${r.id}" placeholder="Notes (what you'd tweak, who liked it...)">${getRating(r.id).notes || ""}</textarea>
+        <div class="modal-actions">
+          ${isExtra ? "" : `<button class="menu-add-btn${placementCount(r.id) ? " in-menu" : ""}" data-addmenu="${r.id}">${placementCount(r.id) ? `✓ In menu (${placementCount(r.id)}) · add again` : "+ Add to weekly menu"}</button>`}
+          <button class="delete-btn" data-del="${r.id}">Dismiss</button>
+        </div>
       </div>`;
     document.getElementById("modalBody").innerHTML = `
       <h2>${r.name}</h2>
@@ -910,8 +914,10 @@
     // add a recipe to the menu rotation (next open matching slot)
     if (t.dataset.addmenu) {
       const ok = addToMenu(t.dataset.addmenu);
+      const modalOpen = !document.getElementById("modal").classList.contains("hidden");
       renderAll();
-      if (!ok) window.alert("Every matching slot across the 3 weeks is full. Remove one on the Menu tab (tap the ×) to add this.");
+      if (modalOpen && modalRecipeId && recipeById[modalRecipeId]) openRecipe(recipeById[modalRecipeId]);
+      if (!ok) window.alert("Every matching slot across the 4 weeks is full. Remove one on the Menu tab (tap the ×) to add this.");
       return;
     }
     // remove a recipe from a menu slot
@@ -962,9 +968,9 @@
       const r = recipeById[t.dataset.del];
       const nm = r ? r.name : "this recipe";
       const msg = r && r.custom
-        ? `Delete "${nm}"? This was one of your uploads and can't be undone.`
-        : `Delete "${nm}"? It will be hidden from the app. You can bring it back with "Restore deleted" on the Explore tab.`;
-      if (window.confirm(msg)) deleteRecipe(t.dataset.del);
+        ? `Dismiss "${nm}"? This was one of your uploads and can't be undone.`
+        : `Dismiss "${nm}"? It will be removed from the app. You can bring it back any time with "Restore deleted" on the Explore tab.`;
+      if (window.confirm(msg)) { deleteRecipe(t.dataset.del); document.getElementById("modal").classList.add("hidden"); }
       return;
     }
     if (t.id === "restoreDeleted") { restoreDeleted(); return; }
