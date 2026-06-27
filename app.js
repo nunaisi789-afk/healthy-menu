@@ -570,13 +570,13 @@
         if (r) {
           const isSide = r.type === "side";
           const low = !isSide && r.proteinPerServing < S.proteinTargetPerMeal;
-          slot.innerHTML = `<div class="meal-label">${meal}<span class="slot-remove" data-remove="${key}" title="Remove from menu">×</span></div>
+          slot.innerHTML = `<div class="meal-label">${meal}<span class="slot-actions"><span class="slot-swap" data-swap="${key}" title="Swap this meal">⇄</span><span class="slot-remove" data-remove="${key}" title="Remove from menu">×</span></span></div>
             <div class="meal-name">${r.name}</div>
             <div class="meal-meta">
               <span class="badge ${isSide ? "side" : "protein"} ${low ? "low" : ""}">${r.proteinPerServing}g</span>
               <span>${totalTime(r)} min</span>
             </div>`;
-          slot.onclick = (e) => { if (e.target.dataset.remove != null) return; openRecipe(r); };
+          slot.onclick = (e) => { if (e.target.dataset.remove != null || e.target.dataset.swap != null) return; openRecipe(r); };
         } else {
           slot.innerHTML = `<div class="meal-label">${meal}</div><div class="empty-slot">+ add a recipe</div>`;
         }
@@ -805,11 +805,55 @@
   // =========================================================================
   // RECIPE MODAL
   // =========================================================================
+  let modalRecipeId = null;
+  // Swap a single meal slot for another recipe, leaving the rest of the week alone.
+  function openSwapPicker(key) {
+    const meal = key.split("|")[2];
+    const currentId = placements[key];
+    const cands = meal === "breakfast"
+      ? RECIPES.filter((r) => (r.meal || []).includes("breakfast"))
+      : RECIPES.filter((r) => { const m = r.meal || []; return m.includes("lunch") || m.includes("dinner"); });
+    cands.sort((a, b) => {
+      const ra = isMenuReady(a.id) ? 1 : 0, rb = isMenuReady(b.id) ? 1 : 0;
+      if (ra !== rb) return rb - ra;
+      const sa = avgScore(a.id) || 0, sb = avgScore(b.id) || 0;
+      if (sa !== sb) return sb - sa;
+      return a.name.localeCompare(b.name);
+    });
+    const rows = cands.map((r) => `<div class="swap-row${r.id === currentId ? " current" : ""}" data-pickkey="${key}" data-pickid="${r.id}">
+        <span class="swap-name">${isWinner(r.id) ? "🏆 " : (isMenuReady(r.id) ? "★ " : "")}${r.name}</span>
+        <span class="muted swap-meta">${r.proteinPerServing ? r.proteinPerServing + "g · " : ""}${totalTime(r)} min${r.id === currentId ? " · current" : ""}</span>
+      </div>`).join("");
+    const parts = key.split("|");
+    document.getElementById("modalBody").innerHTML = `
+      <h2>Swap ${parts[2]} · ${parts[1]}</h2>
+      <p class="muted">Pick another recipe for this slot. Your ratings and the rest of the week stay the same.</p>
+      <div class="swap-list">${rows || `<p class="muted">No alternatives for this meal yet.</p>`}</div>`;
+    document.getElementById("modal").classList.remove("hidden");
+    modalRecipeId = null;
+  }
+
   function openRecipe(r) {
+    modalRecipeId = r.id;
     const ing = (r.ingredients || []).map((i) =>
       `<div class="shop-item"><span class="shop-qty">${fmt(scaleQty(i.qty, r.servings))} ${i.unit}</span><span>${i.item}</span></div>`).join("");
     const steps = (r.steps || []).map((s) => `<li>${s}</li>`).join("");
     const tags = (r.tags || []).map((t) => `<span class="badge side">${t}</span>`).join(" ");
+    // rating block, so you can rate straight from the recipe popup
+    const isExtra = r.type === "dessert" || r.type === "addition" || r.type === "smoothie";
+    const avg = avgScore(r.id);
+    const scorePill = avg != null ? `<span class="score-pill">avg ${avg.toFixed(1)}/5</span>` : `<span class="muted">not rated yet</span>`;
+    const ready = (!isExtra && isMenuReady(r.id))
+      ? (isWinner(r.id) ? `<span class="badge menu-ready">🏆 Winner</span>` : `<span class="badge menu-ready">★ Menu-ready</span>`) : "";
+    const rateBlock = `
+      <div class="modal-rate">
+        <h4>Rate it</h4>
+        ${starRow(r.id, "healthy", "Healthy")}
+        ${starRow(r.id, "tasty", "Tasty")}
+        ${starRow(r.id, "easy", "Easy")}
+        <div class="rc-actions" style="margin-top:8px">${scorePill}${ready}${isExtra ? "" : `<button class="menu-add-btn" data-addmenu="${r.id}">+ Add to menu</button>`}</div>
+        <textarea class="rc-notes" data-notes="${r.id}" placeholder="Notes (what you'd tweak, who liked it...)">${getRating(r.id).notes || ""}</textarea>
+      </div>`;
     document.getElementById("modalBody").innerHTML = `
       <h2>${r.name}</h2>
       <div class="rc-meta">
@@ -826,6 +870,7 @@
       </div>
       ${r.prepNotes ? `<p class="prep-note"><strong>Prep:</strong> ${r.prepNotes}</p>` : ""}
       <div style="margin-top:10px">${tags}</div>
+      ${rateBlock}
       <h4>Ingredients (for ${S.servingsTarget})</h4>${ing}
       <h4>Method</h4><ol>${steps}</ol>
       ${r.prepAhead && r.prepAhead.length ? `<h4>Prep ahead</h4><ul class="prep-list">${r.prepAhead.map((p) => `<li>${p}</li>`).join("")}</ul>` : ""}
@@ -871,10 +916,23 @@
     }
     // remove a recipe from a menu slot
     if (t.dataset.remove != null) { removePlacement(t.dataset.remove); renderAll(); return; }
-    // star rating
+    // open the swap picker for a slot
+    if (t.dataset.swap != null) { openSwapPicker(t.dataset.swap); return; }
+    // pick a replacement recipe in the swap picker
+    const pickRow = t.closest && t.closest("[data-pickid]");
+    if (pickRow) {
+      placements[pickRow.dataset.pickkey] = pickRow.dataset.pickid;
+      savePlacements();
+      document.getElementById("modal").classList.add("hidden");
+      renderAll();
+      return;
+    }
+    // star rating (works on cards and inside the recipe popup)
     if (t.classList.contains("star")) {
       setRating(t.dataset.id, { [t.dataset.axis]: Number(t.dataset.val) });
-      renderExplore();
+      const modalOpen = !document.getElementById("modal").classList.contains("hidden");
+      renderAll();
+      if (modalOpen && modalRecipeId && recipeById[modalRecipeId]) openRecipe(recipeById[modalRecipeId]);
       return;
     }
     // shopping list: mark a staple as always-have (hide it) / put it back

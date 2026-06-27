@@ -96,9 +96,21 @@ main { max-width: 1000px; margin: 0 auto; padding: 16px 20px 60px; }
 .menu-add-btn.in-menu { background: var(--green-soft); color: var(--green-deep); border-color: var(--green-soft); }
 .delete-btn { border: 1px solid #e3c7c4; background: #fff; color: #a8443b; padding: 6px 11px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; margin-left: auto; }
 .delete-btn:hover { background: #a8443b; color: #fff; border-color: #a8443b; }
-.slot-remove { cursor: pointer; color: var(--ink-soft); font-weight: 700; margin-left: 8px; font-size: 15px; }
+.slot-actions { float: right; display: inline-flex; gap: 8px; align-items: center; }
+.slot-swap { cursor: pointer; color: var(--ink-soft); font-weight: 700; font-size: 15px; }
+.slot-swap:hover { color: var(--green); }
+.slot-remove { cursor: pointer; color: var(--ink-soft); font-weight: 700; font-size: 15px; }
 .slot-remove:hover { color: var(--warn); }
 .pool-item { cursor: pointer; }
+.modal-rate { background: #f7f5ee; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 14px 0; }
+.modal-rate h4 { margin: 0 0 8px; color: var(--green-deep); }
+.modal-rate .rc-notes { width: 100%; margin-top: 10px; min-height: 48px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; font: inherit; box-sizing: border-box; }
+.swap-list { margin-top: 12px; max-height: 60vh; overflow-y: auto; }
+.swap-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+.swap-row:hover { border-color: var(--green); background: #f3f7f0; }
+.swap-row.current { border-color: var(--green); background: var(--green-soft); }
+.swap-name { font-weight: 600; }
+.swap-meta { font-size: 12px; white-space: nowrap; }
 .cook-input { width: 100%; min-height: 72px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit; resize: vertical; }
 .cook-row { padding: 5px 0; font-size: 14px; }
 .cook-ok { color: var(--green); font-weight: 600; }
