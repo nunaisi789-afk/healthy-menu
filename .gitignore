@@ -1,0 +1,4 @@
+.claude/
+.scrape-ruhamasfood.json
+.DS_Store
+node_modules/

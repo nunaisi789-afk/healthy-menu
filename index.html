@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Healthy Menu · Explore · Rate · Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <h1>Healthy Menu</h1>
+      <p class="subtitle">Explore recipes · rate them · the best ones become your menu</p>
+      <p class="diet-line" id="dietLine"></p>
+    </div>
+  </header>
+
+  <main>
+    <div class="view-switch">
+      <button class="view-btn active" data-view="explore">Explore &amp; rate</button>
+      <button class="view-btn" data-view="cook">Find a recipe</button>
+      <button class="view-btn" data-view="menu">Menu</button>
+      <button class="view-btn" data-view="prep">Prep</button>
+      <button class="view-btn" data-view="shopping">Shopping list</button>
+      <button class="view-btn" data-view="desserts">Desserts</button>
+      <button class="view-btn" data-view="additions">Additions</button>
+      <button class="view-btn" data-view="smoothies">Smoothies</button>
+    </div>
+
+    <!-- EXPLORE: the recipe library you rate over ~3 months -->
+    <section id="view-explore" class="view">
+      <div class="upload-box">
+        <button class="upload-btn" id="uploadToggle">+ Upload a new recipe</button>
+        <div id="uploadForm" class="upload-form hidden">
+          <input id="upLink" class="cook-input" style="min-height:auto;height:42px" placeholder="Paste an Instagram / TikTok / YouTube link" />
+          <input id="upName" class="cook-input" style="min-height:auto;height:42px;margin-top:8px" placeholder="Recipe name (optional)" />
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="upType" class="up-select">
+              <option value="main">Main</option>
+              <option value="side">Side</option>
+              <option value="dessert">Dessert</option>
+              <option value="addition">Addition</option>
+              <option value="smoothie">Smoothie</option>
+            </select>
+            <button class="menu-add-btn" id="upSubmit">Add to my recipes</button>
+            <button class="linkish" id="upCancel">cancel</button>
+          </div>
+          <p class="muted" style="margin:9px 0 0;font-size:12px">Saves instantly with the video link. The ingredients can be filled in afterward.</p>
+        </div>
+      </div>
+      <div class="explore-bar">
+        <div class="filters" id="exploreFilters"></div>
+        <div class="explore-stats" id="exploreStats"></div>
+      </div>
+      <div id="recipeList"></div>
+    </section>
+
+    <!-- WHAT CAN I MAKE? ingredient matcher -->
+    <section id="view-cook" class="view hidden">
+      <div id="cookBody"></div>
+    </section>
+
+    <!-- MENU: 3-week grid + the menu-ready pool -->
+    <section id="view-menu" class="view hidden">
+      <nav class="tabs" id="weekTabs"></nav>
+      <div id="menuReadyPool"></div>
+      <div id="menuGrid"></div>
+    </section>
+
+    <!-- PREP -->
+    <section id="view-prep" class="view hidden">
+      <nav class="tabs" id="weekTabsPrep"></nav>
+      <div id="prepBody"></div>
+    </section>
+
+    <!-- SHOPPING -->
+    <section id="view-shopping" class="view hidden">
+      <nav class="tabs" id="weekTabsShop"></nav>
+      <div id="shoppingBody"></div>
+    </section>
+
+    <!-- DESSERTS -->
+    <section id="view-desserts" class="view hidden">
+      <div id="dessertsBody"></div>
+    </section>
+
+    <!-- ADDITIONS -->
+    <section id="view-additions" class="view hidden">
+      <div id="additionsBody"></div>
+    </section>
+
+    <!-- SMOOTHIES -->
+    <section id="view-smoothies" class="view hidden">
+      <div id="smoothiesBody"></div>
+    </section>
+  </main>
+
+  <!-- Recipe detail modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose">×</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>Add recipes in <code>data/recipes.js</code> · ratings &amp; your pantry save automatically in this browser</p>
+  </footer>
+
+  <script src="data/recipes.js"></script>
+  <script src="data/menu.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
